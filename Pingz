@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neural Architect AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        .chat-container { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+        #loading { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .dark .glass { background: rgba(15, 23, 42, 0.6); }
+        .msg-ai { border-left: 3px solid #3b82f6; }
+        .training-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        pre { background: #000; color: #0f0; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; font-family: monospace; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+
+    <div id="loading">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-xs tracking-widest uppercase font-bold">Neural Core Loading...</p>
+        </div>
+    </div>
+
+    <div id="app" class="hidden h-screen flex flex-col lg:flex-row overflow-hidden">
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
+            <div class="p-6">
+                <button onclick="createNewChat()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-bold transition-all shadow-lg shadow-blue-500/30 mb-8">
+                    + New Neural Link
+                </button>
+                <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Memory Banks</h3>
+                <div id="chatList" class="space-y-2 overflow-y-auto max-h-[60vh]"></div>
+            </div>
+            <div class="mt-auto p-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span id="themeIcon">🌙</span> Appearance
+                </button>
+                <button onclick="openSettings()" class="w-full flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    ⚙️ Core Config
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col relative bg-slate-50 dark:bg-slate-950">
+            <div class="z-40 p-4 border-b border-slate-200 dark:border-slate-800 glass">
+                <div class="max-w-4xl mx-auto flex items-center gap-4">
+                    <div class="flex-1 relative group">
+                        <input id="trainUrl" type="text" placeholder="Paste URL (YouTube/Web) to evolve AI intelligence..." 
+                               class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                        <div id="trainStatus" class="hidden absolute right-4 top-3 text-blue-500 text-xs font-bold training-pulse">LEARNING...</div>
+                    </div>
+                    <button onclick="processIntelligence()" class="bg-slate-900 dark:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
+                        Train
+                    </button>
+                </div>
+            </div>
+
+            <div id="chatContainer" class="chat-container px-4 py-8 md:px-20 lg:px-32 space-y-6 pb-44">
+                <div id="emptyState" class="h-full flex flex-col items-center justify-center text-center py-20">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center text-4xl mb-6">🧬</div>
+                    <h2 class="text-3xl font-bold mb-2">Neural Architect v3</h2>
+                    <p class="text-slate-500 max-w-md">The more data you feed the training bar, the smarter this specific session becomes.</p>
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-slate-50 dark:from-slate-950">
+                <div class="max-w-4xl mx-auto relative glass p-2 rounded-2xl shadow-2xl flex items-end gap-2">
+                    <textarea id="userInput" rows="1" placeholder="Type your query..." 
+                              class="flex-1 bg-transparent border-none focus:ring-0 resize-none px-4 py-3 text-base" oninput="autoResize(this)"></textarea>
+                    <button id="sendBtn" onclick="handleSendMessage()" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+                <div class="flex justify-center gap-4 mt-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span>Memory: <span id="memStatus">0kb</span></span>
+                    <span>Model: <span id="activeModel">DeepSeek</span></span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="settingsModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm" onclick="closeSettings()"></div>
+        <div class="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-2xl">
+            <h3 class="text-2xl font-bold mb-6">Neural Config</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-tighter">OpenRouter API Key</label>
+                    <input type="password" id="apiKeyInput" class="w-full mt-1 bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-tighter">AI Logic Model</label>
+                    <input type="text" id="modelInput" placeholder="deepseek/deepseek-r1:free" class="w-full mt-1 bg-slate-50 dark:bg-slate-800 border-none p-4 rounded-xl outline-none">
+                </div>
+            </div>
+            <button onclick="saveSettings()" class="w-full mt-8 bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-500/40">Initialize Changes</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Neural State Engine ---
+        let state = {
+            chats: JSON.parse(localStorage.getItem('v3_data') || '[]'),
+            activeId: localStorage.getItem('v3_active') || null,
+            apiKey: localStorage.getItem('v3_key') || '',
+            model: localStorage.getItem('v3_model') || 'deepseek/deepseek-r1:free',
+            dark: localStorage.getItem('v3_dark') === 'true'
+        };
+
+        // --- Core Intelligence ---
+        async function processIntelligence() {
+            const urlInput = document.getElementById('trainUrl');
+            const status = document.getElementById('trainStatus');
+            const url = urlInput.value.trim();
+            if (!url) return;
+
+            status.classList.remove('hidden');
+            if (!state.activeId) createNewChat("Evolved Link");
+
+            try {
+                // High-Speed Scraper via Puter.js
+                const response = await puter.net.fetch(url);
+                const html = await response.text();
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                
+                // Content Extraction Logic
+                const title = doc.title || "External Source";
+                const bodyText = doc.body.innerText.replace(/\s+/g, ' ').substring(0, 8000);
+
+                const currentChat = state.chats.find(c => c.id === state.activeId);
+                
+                // Data Memory Logic: Append to a structured knowledge array
+                if (!currentChat.memory) currentChat.memory = [];
+                currentChat.memory.push({
+                    source: url,
+                    title: title,
+                    timestamp: new Date().toISOString(),
+                    data: bodyText
+                });
+
+                // Auto-rename chat based on site title
+                currentChat.title = "Memory: " + title.substring(0, 20);
+                
+                urlInput.value = "";
+                alert(`Intelligence evolved. Source absorbed: ${title}`);
+                updateMemoryCount();
+            } catch (e) {
+                alert("Neural link failed: Check URL or CORS permissions.");
+            } finally {
+                status.classList.add('hidden');
+                save();
+                refreshUI();
+            }
+        }
+
+        async function handleSendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text || !state.apiKey) return;
+
+            if (!state.activeId) createNewChat(text.substring(0, 25));
+            const chat = state.chats.find(c => c.id === state.activeId);
+            
+            chat.messages.push({ role: 'user', content: text });
+            input.value = ""; autoResize(input);
+            renderMessages();
+
+            // Intelligence Layer: Constructing the prompt with Long-Term Memory
+            const learnedContext = chat.memory ? chat.memory.map(m => `[Source: ${m.title}]\n${m.data}`).join('\n---\n') : "";
+            const systemPrompt = `
+                You are a Highly Intelligent Neural Architect. 
+                Below is your LEARNED MEMORY/KNOWLEDGE BASE. Use this data preferentially to answer questions:
+                ---
+                ${learnedContext}
+                ---
+                If the user asks about the sources above, be precise. If not, use your general intelligence.
+            `;
+
+            const aiMsg = { role: 'assistant', content: '' };
+            chat.messages.push(aiMsg);
+
+            try {
+                const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${state.apiKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: state.model,
+                        messages: [{ role: "system", content: systemPrompt }, ...chat.messages.slice(0, -1)],
+                        stream: true
+                    })
+                });
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunks = decoder.decode(value).split('\n');
+                    for (const chunk of chunks) {
+                        if (chunk.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(chunk.slice(6));
+                                aiMsg.content += data.choices[0]?.delta?.content || "";
+                                streamUI(aiMsg.content);
+                            } catch {}
+                        }
+                    }
+                }
+            } catch (err) {
+                aiMsg.content = "Neural link severed. Check API key.";
+            } finally {
+                save();
+                renderMessages();
+            }
+        }
+
+        // --- UI & Memory Management ---
+        function save() {
+            localStorage.setItem('v3_data', JSON.stringify(state.chats));
+            localStorage.setItem('v3_active', state.activeId);
+            localStorage.setItem('v3_key', state.apiKey);
+            localStorage.setItem('v3_model', state.model);
+            localStorage.setItem('v3_dark', state.dark);
+        }
+
+        function createNewChat(title = "New Neural Link") {
+            const id = Date.now().toString();
+            state.chats.unshift({ id, title, messages: [], memory: [] });
+            state.activeId = id;
+            save(); refreshUI();
+        }
+
+        function refreshUI() {
+            const list = document.getElementById('chatList');
+            list.innerHTML = state.chats.map(c => `
+                <div onclick="switchChat('${c.id}')" class="group flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${state.activeId === c.id ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}">
+                    <span class="truncate text-xs font-bold">${c.title}</span>
+                    <button onclick="deleteChat(event, '${c.id}')" class="opacity-0 group-hover:opacity-100 text-[10px]">✕</button>
+                </div>
+            `).join('');
+            renderMessages();
+            updateMemoryCount();
+        }
+
+        function updateMemoryCount() {
+            const chat = state.chats.find(c => c.id === state.activeId);
+            const size = chat ? JSON.stringify(chat.memory).length : 0;
+            document.getElementById('memStatus').innerText = (size / 1024).toFixed(1) + "kb";
+            document.getElementById('activeModel').innerText = state.model.split('/')[1] || "DeepSeek";
+        }
+
+        function switchChat(id) { state.activeId = id; save(); refreshUI(); }
+        function deleteChat(e, id) { e.stopPropagation(); state.chats = state.chats.filter(c => c.id !== id); if(state.activeId === id) state.activeId = null; save(); refreshUI(); }
+
+        function renderMessages() {
+            const container = document.getElementById('chatContainer');
+            const chat = state.chats.find(c => c.id === state.activeId);
+            if (!chat) return;
+            document.getElementById('emptyState').classList.toggle('hidden', chat.messages.length > 0);
+            container.innerHTML = chat.messages.map(m => `
+                <div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start animate-fadeIn'}">
+                    <div class="${m.role === 'user' ? 'bg-blue-600 text-white' : 'glass msg-ai'} max-w-[85%] rounded-3xl px-6 py-4 shadow-sm">
+                        <div class="prose dark:prose-invert prose-sm leading-relaxed">${marked.parse(m.content)}</div>
+                    </div>
+                </div>
+            `).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function streamUI(content) {
+            const last = document.getElementById('chatContainer').lastElementChild?.querySelector('.prose');
+            if (last) {
+                last.innerHTML = marked.parse(content);
+                document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+            }
+        }
+
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        function toggleDarkMode() { state.dark = !state.dark; applyTheme(); save(); }
+        function applyTheme() {
+            document.documentElement.classList.toggle('dark', state.dark);
+            document.getElementById('themeIcon').innerText = state.dark ? '☀️' : '🌙';
+        }
+        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+        function saveSettings() {
+            state.apiKey = document.getElementById('apiKeyInput').value;
+            state.model = document.getElementById('modelInput').value || 'deepseek/deepseek-r1:free';
+            save(); closeSettings();
+        }
+
+        window.onload = () => {
+            applyTheme();
+            refreshUI();
+            document.getElementById('apiKeyInput').value = state.apiKey;
+            document.getElementById('modelInput').value = state.model;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+        };
+
+        document.getElementById('userInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); }
+        });
+    </script>
+</body>
+</html>

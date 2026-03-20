@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Pingz AI</string>
+    <string name="ask_pingz">Ask Pingz AI anything...</string>
+    <string name="training_dashboard">Training Dashboard</string>
+    <string name="train_url">Train via URL</string>
+    <string name="train_youtube">Train via YouTube</string>
+    <string name="upload_pdf">Upload PDF/Text</string>
+    <string name="enter_url_hint">Enter webpage or video URL</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+</resources>

@@ -2,6 +2,10 @@
 
 Pingz AI is a production-ready AI assistant similar to Gemini, featuring a FastAPI backend with RAG (Retrieval-Augmented Generation) memory and a modern Android application.
 
+## 🚀 Mobile App (APK)
+Download and install the Pingz AI Android app:
+- **[Download PingzAI.apk](PingzAI.apk)**
+
 ## 🚀 Key Features
 - **Intelligent Chat**: Expert-level reasoning with memory.
 - **RAG Memory**: Uses FAISS vector database to learn from provided information.
